@@ -27,7 +27,7 @@ def get_command():
     global command
     if command:
         cmd = command
-        command = None   # 한 번 보내면 삭제
+        command = "AlreadyLocked"   # 한 번 보내면 삭제
         return jsonify(command=cmd)
     return jsonify(command=None)
 
