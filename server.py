@@ -1,20 +1,15 @@
 from flask import Flask, jsonify, request
 import time
-
+from flask import *
+password = "6974"
 app = Flask(__name__)
-
 last_ping = 0
-command = None   # 서버가 내릴 명령
+command = "Released"   # 서버가 내릴 명령
 
 @app.route("/")
 def status():
     online = time.time() - last_ping < 20
-    return f"""
-    <h1>PC 상태: {'🟢 켜짐' if online else '🔴 꺼짐'}</h1>
-    <form action="/lock" method="post">
-        <button type="submit">🔒 PC 잠그기</button>
-    </form>
-    """
+    return render_template("index.html", online=online, command=command)
 
 @app.route("/ping", methods=["POST"])
 def ping():
@@ -27,15 +22,26 @@ def get_command():
     global command
     if command:
         cmd = command
-        command = "AlreadyLocked"   # 한 번 보내면 삭제
         return jsonify(command=cmd)
     return jsonify(command=None)
 
 @app.route("/lock", methods=["POST"])
 def lock():
     global command
-    command = "LOCK"
+    pw = request.json.get("password")
+    if pw != password:
+        return "잘못된 비밀번호"
+    command = "Locked"
     return "잠금 명령 전송됨"
+@app.route("/release", methods=["POST"])
+def release():
+    global command
+    pw = request.json.get("password")
+    if pw != password:
+        return "잘못된 비밀번호"
+    command = "Released"
+    return "잠금 해제 명령 전송됨"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
+

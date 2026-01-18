@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC 상태</title>
+</head>
+<body>
+    <h1 id="status">PC 온오프 상태: {%if online%}🟢 켜짐{%else%}🔴 꺼짐{%endif%}</h1>
+    <h1 id="command">PC 잠금 상태: {%if command == "Locked"%}🔒 잠금됨{%else%}🔓 잠금 해제됨{%endif%}</h1>
+    {% if command == "Locked" %}
+    <button onclick="releasePC()" class="release-button">🔓 PC 잠금 해제</button>
+    <style>
+        .release-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            background-color: #f44336;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .release-button:hover {
+            background-color: #da190b;
+        }
+    </style>
+    {% elif command == "Released" %}
+    <button onclick="lockPC()" class="lock-button">🔒 PC 잠그기</button>
+    <style>
+        .lock-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .lock-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    {% else %}
+    오류 발생 command : {{ command }}
+    {% endif %}
+    <input type="password" name="PW" id="PW" placeholder="비밀번호 입력">
+    <style>
+        #PW {
+            padding: 12px 20px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+        }
+        #PW:focus {
+            border: 2px solid #555;
+        }
+    </style>
+
+    <script>
+        function updateStatus() {
+            fetch('/').then(response => response.text()).then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                document.getElementById('status').innerText = doc.querySelector('h1').innerText;
+            });
+        }
+
+        function lockPC() {
+            fetch('/lock', { method: 'POST', body: JSON.stringify({ password: document.getElementById('PW').value }), headers: { 'Content-Type': 'application/json' } });
+            // 새로고침
+            location.reload();
+        }
+        function releasePC() {
+            fetch('/release', { method: 'POST', body: JSON.stringify({ password: document.getElementById('PW').value }), headers: { 'Content-Type': 'application/json' } });
+            // 새로고침
+            location.reload();
+        }
+
+        setInterval(updateStatus, 5000);
+        updateStatus();
+    </script>
+</body>
+</html>
