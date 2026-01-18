@@ -1,21 +1,38 @@
-from flask import Flask, jsonify
-from datetime import datetime, timedelta
+from flask import Flask, jsonify, request
+import time
 
 app = Flask(__name__)
 
-LAST_PING = None
-
-@app.route("/ping", methods=["POST"])
-def ping():
-    global LAST_PING
-    LAST_PING = datetime.utcnow()
-    return jsonify({"ok": True})
+last_ping = 0
+command = None   # 서버가 내릴 명령
 
 @app.route("/")
 def status():
-    if LAST_PING and datetime.utcnow() - LAST_PING < timedelta(seconds=15):
-        return "🟢 PC 켜짐"
-    return "🔴 PC 꺼짐"
+    online = time.time() - last_ping < 20
+    return f"""
+    <h1>PC 상태: {'🟢 켜짐' if online else '🔴 꺼짐'}</h1>
+    <form action="/lock" method="post">
+        <button type="submit">🔒 PC 잠그기</button>
+    </form>
+    """
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+@app.route("/ping", methods=["POST"])
+def ping():
+    global last_ping
+    last_ping = time.time()
+    return jsonify(ok=True)
+
+@app.route("/get-command", methods=["GET"])
+def get_command():
+    global command
+    if command:
+        cmd = command
+        command = None   # 한 번 보내면 삭제
+        return jsonify(command=cmd)
+    return jsonify(command=None)
+
+@app.route("/lock", methods=["POST"])
+def lock():
+    global command
+    command = "LOCK"
+    return "잠금 명령 전송됨"
