@@ -101,7 +101,7 @@
                 if (message == "1") {
                     messageElement.innerText = "PC가 성공적으로 잠금 해제되었습니다.";
                     messageElement.style.color = "green";
-                } else {
+                } else if (message == "0") {
                     messageElement.innerText = "PC 잠금 해제 실패: 비밀번호가 올바르지 않습니다.";
                     messageElement.style.color = "red";
                 }
@@ -122,9 +122,12 @@
                 if (message == "1") {
                     messageElement.innerText = "비밀번호가 성공적으로 변경되었습니다.";
                     messageElement.style.color = "green";
-                } else {
+                } else if (message == "0") {
                     messageElement.innerText = "비밀번호 변경 실패: 현재 비밀번호가 올바르지 않습니다.";
                     messageElement.style.color = "red";
+                } else if (message == "2") {
+                    messageElement.innerText = "비밀번호 변경 실패: 새 비밀번호가 현재 비밀번호와 같습니다.";
+                    messageElement.style.color = "orange";
                 }
             });
             updateStatus();

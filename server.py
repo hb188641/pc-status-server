@@ -46,6 +46,8 @@ def set_password():
     global password
     pw = request.json.get("password")
     new_pw = request.json.get("new_password")
+    if pw==new_pw:
+        return "2"
     if pw != password:
         return "0"
     password = new_pw
