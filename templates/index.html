@@ -63,6 +63,11 @@
     <br>
     <p id="message"></p>
     <script>
+        function clearAllInputs() {
+            document.getElementById('PW').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('new_password').value = '';
+        }
         function updateStatus() {
             fetch('/get-command').then(response => response.json()).then(data => {
                 var statusElement = document.getElementById('status');
@@ -88,6 +93,7 @@
                 }
             });
             updateStatus();
+            clearAllInputs();
         }
         function releasePC() {
             fetch('/release', { method: 'POST', body: JSON.stringify({ password: document.getElementById('PW').value }), headers: { 'Content-Type': 'application/json' } }).then(response => response.text()).then(message => {
@@ -101,6 +107,7 @@
                 }
             });
             updateStatus();
+            clearAllInputs();
         }
         function changePassword() {
             fetch('/change-password', { 
@@ -121,9 +128,11 @@
                 }
             });
             updateStatus();
+            clearAllInputs();
         }
         setInterval(updateStatus, 10000);
         updateStatus();
+        clearAllInputs();
     </script>
 </body>
 </html>
