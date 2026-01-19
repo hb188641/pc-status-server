@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 import time
 from flask import *
-password = "6974"
+password = ""
 app = Flask(__name__)
 last_ping = 0
 command = "Released"   # 서버가 내릴 명령
