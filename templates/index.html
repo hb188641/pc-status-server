@@ -7,6 +7,7 @@
 </head>
 <body>
     <h1 id="status">PC 온오프 상태: {%if online%}🟢 켜짐{%else%}🔴 꺼짐{%endif%}</h1>
+    
     <h1 id="command">PC 잠금 상태: {%if command == "Locked"%}🔒 잠금됨{%else%}🔓 잠금 해제됨{%endif%}</h1>
     <button onclick="releasePC()" class="release-button" hidden>🔓 PC 잠금 해제</button>
     <style>
@@ -40,6 +41,7 @@
             background-color: #45a049;
         }
     </style>
+    <br>
     <input type="password" name="PW" id="PW" placeholder="비밀번호 입력">
     <style>
         #PW {
@@ -55,6 +57,7 @@
     </style>
     <input type="password" name="password" id="password" placeholder="현재 비밀번호 입력" style="margin-left: 10px;">
     <input type="password" name="new_password" id="new_password" placeholder="새 비밀번호 입력" style="margin-left: 10px;">
+    <br>
     <input type="button" value="비밀번호 변경" onclick="changePassword()" style="margin-left: 10px;">
     <br>
     <p id="message"></p>
