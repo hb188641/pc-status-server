@@ -3,63 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PC 상태</title>
-</head>
-<body>
-    <h1 id="status">PC 온오프 상태: {%if online%}🟢 켜짐{%else%}🔴 꺼짐{%endif%}</h1>
-    
-    <h1 id="command">PC 잠금 상태: {%if command == "Locked"%}🔒 잠금됨{%else%}🔓 잠금 해제됨{%endif%}</h1>
-    <button onclick="releasePC()" class="release-button" hidden>🔓 PC 잠금 해제</button>
+    <title>PC Status</title>
     <style>
-        .release-button {
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .button {
             padding: 12px 24px;
             border: none;
             border-radius: 50px;
-            background-color: #f44336;
             color: white;
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin: 5px;
         }
-        .release-button:hover {
+        .unlock-button {
+            background-color: #f44336;
+        }
+        .unlock-button:hover {
             background-color: #da190b;
         }
-    </style>
-    <button onclick="lockPC()" class="lock-button" hidden>🔒 PC 잠그기</button>
-    <style>
         .lock-button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 50px;
             background-color: #4CAF50;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
         }
         .lock-button:hover {
             background-color: #45a049;
         }
-    </style>
-    <br>
-    <input type="password" name="PW" id="PW" placeholder="비밀번호 입력">
-    <style>
-        #PW {
+        input[type="password"] {
             padding: 12px 20px;
             margin: 8px 0;
             box-sizing: border-box;
             border: 2px solid #ccc;
             border-radius: 4px;
+            width: calc(100% - 24px);
         }
-        #PW:focus {
+        input[type="password"]:focus {
             border: 2px solid #555;
         }
+        input[type="button"] {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        input[type="button"]:hover {
+            background-color: #1976D2;
+        }
+        #message {
+            margin-top: 20px;
+            font-weight: bold;
+        }
     </style>
+</head>
+<body>
+    <h1 id="status">PC Power Status: {%if online%}🟢 On{%else%}🔴 Off{%endif%}</h1>
+    <h1 id="command">PC Lock Status: {%if command == "Locked"%}🔒 Locked{%else%}🔓 Unlocked{%endif%}</h1>
+    <button onclick="unlockPC()" class="button unlock-button" hidden>🔓 Unlock PC</button>
+    <button onclick="lockPC()" class="button lock-button" hidden>🔒 Lock PC</button>
     <br>
-    <input type="password" name="password" id="password" placeholder="현재 비밀번호 입력" style="margin-left: 10px;">
-    <input type="password" name="new_password" id="new_password" placeholder="새 비밀번호 입력" style="margin-left: 10px;">
+    <input type="password" name="PW" id="PW" placeholder="Enter Password">
+    <input type="password" name="password" id="password" placeholder="Current Password" style="margin-left: 10px;">
+    <input type="password" name="new_password" id="new_password" placeholder="New Password" style="margin-left: 10px;">
     <br>
-    <input type="button" value="비밀번호 변경" onclick="changePassword()" style="margin-left: 10px;">
+    <input type="button" value="Change Password" onclick="changePassword()" style="margin-left: 10px;">
     <br>
     <p id="message"></p>
     <script>
@@ -72,40 +89,27 @@
             fetch('/get-command').then(response => response.json()).then(data => {
                 var statusElement = document.getElementById('status');
                 var commandElement = document.getElementById('command');
-                var releaseButton = document.getElementsByClassName('release-button')[0];
+                var unlockButton = document.getElementsByClassName('unlock-button')[0];
                 var lockButton = document.getElementsByClassName('lock-button')[0];
-                statusElement.innerText = "PC 온오프 상태: " + (data.online ? "🟢 켜짐" : "🔴 꺼짐");
-                commandElement.innerText = "PC 잠금 상태: " + (data.command == "Locked" ? "🔒 잠금됨" : "🔓 잠금 해제됨");
-                releaseButton.hidden = data.command == "Released";
+                statusElement.innerText = "PC Power Status: " + (data.online ? "🟢 On" : "🔴 Off");
+                commandElement.innerText = "PC Lock Status: " + (data.command == "Locked" ? "🔒 Locked" : "🔓 Unlocked");
+                unlockButton.hidden = data.command == "Unlocked";
                 lockButton.hidden = data.command == "Locked";
+            });
+            fetch('/get-message').then(response => response.json()).then(data => {
+                var messageElement = document.getElementById('message');
+                messageElement.innerText = data.msg;
+                messageElement.style.color = data.css_color;
             });
         }
 
         function lockPC() {
-            fetch('/lock', { method: 'POST', body: JSON.stringify({ password: document.getElementById('PW').value }), headers: { 'Content-Type': 'application/json' } }).then(response => response.text()).then(message => {
-                var messageElement = document.getElementById('message');
-                if (message == "1") {
-                    messageElement.innerText = "PC가 성공적으로 잠금되었습니다.";
-                    messageElement.style.color = "green";
-                } else {
-                    messageElement.innerText = "PC 잠금 실패: 비밀번호가 올바르지 않습니다.";
-                    messageElement.style.color = "red";
-                }
-            });
+            fetch('/lock', { method: 'POST', body: JSON.stringify({ password: document.getElementById('PW').value }), headers: { 'Content-Type': 'application/json' } });
             updateStatus();
             clearAllInputs();
         }
-        function releasePC() {
-            fetch('/release', { method: 'POST', body: JSON.stringify({ password: document.getElementById('PW').value }), headers: { 'Content-Type': 'application/json' } }).then(response => response.text()).then(message => {
-                var messageElement = document.getElementById('message');
-                if (message == "1") {
-                    messageElement.innerText = "PC가 성공적으로 잠금 해제되었습니다.";
-                    messageElement.style.color = "green";
-                } else if (message == "0") {
-                    messageElement.innerText = "PC 잠금 해제 실패: 비밀번호가 올바르지 않습니다.";
-                    messageElement.style.color = "red";
-                }
-            });
+        function unlockPC() {
+            fetch('/unlock', { method: 'POST', body: JSON.stringify({ password: document.getElementById('PW').value }), headers: { 'Content-Type': 'application/json' } });
             updateStatus();
             clearAllInputs();
         }
@@ -117,23 +121,11 @@
                     new_password: document.getElementById('new_password').value
                 }), 
                 headers: { 'Content-Type': 'application/json' } 
-            }).then(response => response.text()).then(message => {
-                var messageElement = document.getElementById('message');
-                if (message == "1") {
-                    messageElement.innerText = "비밀번호가 성공적으로 변경되었습니다.";
-                    messageElement.style.color = "green";
-                } else if (message == "0") {
-                    messageElement.innerText = "비밀번호 변경 실패: 현재 비밀번호가 올바르지 않습니다.";
-                    messageElement.style.color = "red";
-                } else if (message == "2") {
-                    messageElement.innerText = "비밀번호 변경 실패: 새 비밀번호가 현재 비밀번호와 같습니다.";
-                    messageElement.style.color = "orange";
-                }
             });
             updateStatus();
             clearAllInputs();
         }
-        setInterval(updateStatus, 10000);
+        setInterval(updateStatus, 1000);
         updateStatus();
         clearAllInputs();
     </script>
