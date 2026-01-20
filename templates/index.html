@@ -99,8 +99,20 @@
                 var commandElement = document.getElementById('command');
                 var unlockButton = document.getElementsByClassName('unlock-button')[0];
                 var lockButton = document.getElementsByClassName('lock-button')[0];
-                statusElement.innerText = "PC Power Status: " + (data.online ? "🟢 On" : "🔴 Off");
-                commandElement.innerText = "PC Lock Status: " + (data.command == "Locked" ? "🔒 Locked" : "🔓 Unlocked");
+                if (data.command === "Locked") {
+                    commandElement.innerText = "PC Lock Status: 🔒 Locked";
+                }
+                else if (data.command === "Unlocked") {
+                    commandElement.innerText = "PC Lock Status: 🔓 Unlocked";
+                }
+                else if (data.command === "TryingToUnlock") {
+                    commandElement.innerText = "PC Lock Status: 🔒 Locked";
+                }
+                else if (data.command === "TryingToLock") {
+                    commandElement.innerText = "PC Lock Status: 🔓 Unlocked";
+                }
+
+
                 unlockButton.hidden = data.command != "Locked";
                 lockButton.hidden = data.command != "Unlocked";
             });
