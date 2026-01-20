@@ -44,6 +44,7 @@ def lock():
     if pw != password:
         message = {"msg": "Incorrect password.", "css_color": "red"}
         return "0"
+    command = "TryingToLock"
     message = {"msg": "Lock request has been sent.", "css_color": "orange"}
     return "1"
 
