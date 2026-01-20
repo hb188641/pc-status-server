@@ -101,8 +101,8 @@
                 var lockButton = document.getElementsByClassName('lock-button')[0];
                 statusElement.innerText = "PC Power Status: " + (data.online ? "🟢 On" : "🔴 Off");
                 commandElement.innerText = "PC Lock Status: " + (data.command == "Locked" ? "🔒 Locked" : "🔓 Unlocked");
-                unlockButton.hidden = data.command == "Unlocked";
-                lockButton.hidden = data.command == "Locked";
+                unlockButton.hidden = data.command != "Locked";
+                lockButton.hidden = data.command != "Unlocked";
             });
             fetch('/get-message').then(response => response.json()).then(data => {
                 var messageElement = document.getElementById('message');

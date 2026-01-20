@@ -44,7 +44,6 @@ def lock():
     if pw != password:
         message = {"msg": "Incorrect password.", "css_color": "red"}
         return "0"
-    command = "Locked"
     message = {"msg": "Lock request has been sent.", "css_color": "orange"}
     return "1"
 
@@ -55,7 +54,7 @@ def unlock():
     if pw != password:
         message = {"msg": "Incorrect password.", "css_color": "red"}
         return "0"
-    command = "Unlocked"
+    command = "TryingToUnlock"
     message = {"msg": "Unlock request has been sent.", "css_color": "orange"}
     return "1"
 
@@ -80,7 +79,7 @@ def favicon():
 
 @app.route("/set-message", methods=["POST"])
 def set_message():
-    global message, API_KEY
+    global message, API_KEY, command
     api_key = request.headers.get("API-Key")
     
     if api_key != API_KEY:
@@ -89,6 +88,10 @@ def set_message():
         "msg": request.json.get("msg", ""),
         "css_color": request.json.get("css_color", "")
     }
+    if message["msg"] == "PC is unlocked.":
+        command = "Unlocked"
+    if message["msg"] == "PC is locked.":
+        command = "Locked"
     return "1"
 
 @app.route("/get-message", methods=["GET"])

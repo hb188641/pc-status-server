@@ -24,11 +24,11 @@ while True:
         print(cmd)
         if newcmd != cmd:
             cmd = newcmd
-            if cmd == "Locked":
+            if cmd == "TryingToLock":
                 print("Lock command received.")
                 os.system("cmd /c start ./JustLockedDisplay_.exe")
                 requests.post(f"{SERVER}/set-message", json={"msg":"PC is locked.", "css_color":"red"}, headers={"API-Key": API_KEY}, timeout=5)
-            elif cmd == "Unlocked":
+            elif cmd == "TryingToUnlock":
                 print("Unlock command received.")
                 os.system("taskkill /F /IM JustLockedDisplay_.exe")
                 os.system("cmd /c start explorer.exe")
