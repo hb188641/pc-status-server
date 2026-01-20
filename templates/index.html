@@ -45,9 +45,6 @@
             border-radius: 4px;
             width: calc(100% - 24px);
         }
-        input[type="password"]:focus {
-            border: 2px solid #555;
-        }
         input[type="button"] {
             background-color: #2196F3;
             color: white;
@@ -64,6 +61,15 @@
             margin-top: 20px;
             font-weight: bold;
         }
+        input[type="password"] {
+        padding: 12px 20px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        width: 250px;  /* calc(100% - 24px)에서 고정값으로 변경 */
+        }
+
     </style>
 </head>
 <body>
@@ -73,7 +79,9 @@
     <button onclick="lockPC()" class="button lock-button" hidden>🔒 Lock PC</button>
     <br>
     <input type="password" name="PW" id="PW" placeholder="Enter Password">
+    <br>
     <input type="password" name="password" id="password" placeholder="Current Password" style="margin-left: 10px;">
+    <br>
     <input type="password" name="new_password" id="new_password" placeholder="New Password" style="margin-left: 10px;">
     <br>
     <input type="button" value="Change Password" onclick="changePassword()" style="margin-left: 10px;">
