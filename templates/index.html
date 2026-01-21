@@ -99,6 +99,7 @@
                 var commandElement = document.getElementById('command');
                 var unlockButton = document.getElementsByClassName('unlock-button')[0];
                 var lockButton = document.getElementsByClassName('lock-button')[0];
+                statusElement.innerText = "PC Power Status: " + (data.online ? "🟢 On" : "🔴 Off");
                 if (data.command === "Locked") {
                     commandElement.innerText = "PC Lock Status: 🔒 Locked";
                 }

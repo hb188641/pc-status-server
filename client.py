@@ -11,10 +11,11 @@ SERVER = sys.argv[1]
 API_KEY = sys.argv[2]
 
 
-
-cmd = "Unlocked"
+time.sleep(2)
+cmd = "Locked"
 while True:
     try:
+        # Initial lock on startup
         # Send heartbeat signal
         requests.post(f"{SERVER}/ping", timeout=5,headers={"API-Key": API_KEY})
         print("Ping sent to server.")
@@ -33,9 +34,16 @@ while True:
                 os.system("taskkill /F /IM JustLockedDisplay_.exe")
                 os.system("cmd /c start explorer.exe")
                 requests.post(f"{SERVER}/set-message", json={"msg":"PC is unlocked.", "css_color":"green"}, headers={"API-Key": API_KEY}, timeout=5)
-        
+            elif cmd == "Unlocked":
+                print("Unlocked command received.")
+                os.system("taskkill /F /IM JustLockedDisplay_.exe")
+                os.system("cmd /c start explorer.exe")
+                requests.post(f"{SERVER}/set-message", json={"msg":"PC is unlocked.", "css_color":"green"}, headers={"API-Key": API_KEY}, timeout=5)
+
     except Exception as e:
         print("Error communicating with server:", e)
+        cmd = "Locked"
+        os.system("cmd /c start ./internal/JustLockedDisplay_.exe --lock")
         pass
 
     time.sleep(2)

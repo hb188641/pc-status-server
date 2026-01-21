@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+        .unlock-button {
+            background-color: #f44336;
+        }
+        .unlock-button:hover {
+            background-color: #da190b;
+        }
+        .lock-button {
+            background-color: #4CAF50;
+        }
+        .lock-button:hover {
+            background-color: #45a049;
+        }
+        input[type="password"] {
+            padding: 12px 20px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            width: calc(100% - 24px);
+        }
+        input[type="button"] {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        input[type="button"]:hover {
+            background-color: #1976D2;
+        }
+        #message {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        input[type="password"] {
+        padding: 12px 20px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        width: 250px;  /* calc(100% - 24px)에서 고정값으로 변경 */
+        }
+
+    </style>
+</head>
+<body>
+    <h1 id="status">PC Power Status: {%if online%}🟢 On{%else%}🔴 Off{%endif%}</h1>
+    <h1 id="command">PC Lock Status: {%if command == "Locked"%}🔒 Locked{%else%}🔓 Unlocked{%endif%}</h1>
+    <button onclick="unlockPC()" class="button unlock-button" hidden>🔓 Unlock PC</button>
+    <button onclick="lockPC()" class="button lock-button" hidden>🔒 Lock PC</button>
+    <br>
+    <input type="password" name="PW" id="PW" placeholder="Enter Password">
+    <br>
+    <input type="password" name="password" id="password" placeholder="Current Password" style="margin-left: 10px;">
+    <br>
+    <input type="password" name="new_password" id="new_password" placeholder="New Password" style="margin-left: 10px;">
+    <br>
+    <input type="button" value="Change Password" onclick="changePassword()" style="margin-left: 10px;">
+    <br>
+    <p id="message"></p>
+    <script>
+        function clearAllInputs() {
+            document.getElementById('PW').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('new_password').value = '';
+        }
+        function updateStatus() {
+            fetch('/get-command').then(response => response.json()).then(data => {
+                var statusElement = document.getElementById('status');
+                var commandElement = document.getElementById('command');
+                var unlockButton = document.getElementsByClassName('unlock-button')[0];
+                var lockButton = document.getElementsByClassName('lock-button')[0];
+                if (data.command === "Locked") {
+                    commandElement.innerText = "PC Lock Status: 🔒 Locked";
+                }
+                else if (data.command === "Unlocked") {
+                    commandElement.innerText = "PC Lock Status: 🔓 Unlocked";
+                }
+                else if (data.command === "TryingToUnlock") {
+                    commandElement.innerText = "PC Lock Status: 🔒 Locked";
+                }
+                else if (data.command === "TryingToLock") {
+                    commandElement.innerText = "PC Lock Status: 🔓 Unlocked";
+                }
+
+
+                unlockButton.hidden = data.command != "Locked";
+                lockButton.hidden = data.command != "Unlocked";
+            });
+            fetch('/get-message').then(response => response.json()).then(data => {
+                var messageElement = document.getElementById('message');
+                messageElement.innerText = data.msg;
+                messageElement.style.color = data.css_color;
+            });
+        }
+
+        function lockPC() {
+            fetch('/lock', { method: 'POST', body: JSON.stringify({ password: document.getElementById('PW').value }), headers: { 'Content-Type': 'application/json' } });
+            updateStatus();
+            clearAllInputs();
+        }
+        function unlockPC() {
+            fetch('/unlock', { method: 'POST', body: JSON.stringify({ password: document.getElementById('PW').value }), headers: { 'Content-Type': 'application/json' } });
+            updateStatus();
+            clearAllInputs();
+        }
+        function changePassword() {
+            fetch('/change-password', { 
+                method: 'POST', 
+                body: JSON.stringify({ 
+                    password: document.getElementById('password').value,
+                    new_password: document.getElementById('new_password').value
+                }), 
+                headers: { 'Content-Type': 'application/json' } 
+            });
+            updateStatus();
+            clearAllInputs();
+        }
+        setInterval(updateStatus, 1000);
+        updateStatus();
+        clearAllInputs();
+    </script>
+</body>
+</html>
