@@ -16,7 +16,7 @@ message = {"msg": "", "css_color": ""}
 
 @app.route("/")
 def status():
-    online = time.time() - last_ping < 20
+    online = time.time() - last_ping < 7
     return render_template("index.html", online=online, command=command, message=message)
 
 @app.route("/ping", methods=["POST"])
@@ -34,8 +34,8 @@ def get_command():
     global command
     if command:
         cmd = command
-        return jsonify(command=cmd, online=(time.time() - last_ping < 20))
-    return jsonify(command=None, online=(time.time() - last_ping < 20))
+        return jsonify(command=cmd, online=(time.time() - last_ping < 7))
+    return jsonify(command=None, online=(time.time() - last_ping < 7))
 
 @app.route("/lock", methods=["POST"])
 def lock():

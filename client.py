@@ -46,4 +46,4 @@ while True:
         os.system("cmd /c start ./internal/JustLockedDisplay_.exe --lock")
         pass
 
-    time.sleep(2)
+    time.sleep(3)
