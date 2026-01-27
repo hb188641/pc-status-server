@@ -1,14 +1,7 @@
-import signal
-import os
-import sys
-from flask import Response
-from flask import render_template
-import logging
-from threading import Thread
 from flask import Flask, jsonify, request
 import time
-log = logging.getLogger('werkzeug')
-log.disabled = True
+from flask import *
+
 def generate_api_key():
     import random
     import string
@@ -20,21 +13,15 @@ app = Flask(__name__)
 last_ping = 0
 command = "Unlocked"
 message = {"msg": "", "css_color": ""}
-server_status = "Online"
 
 @app.route("/")
 def status():
-    global server_status
-    if server_status == "Offline":
-        return "Server is offline.", 503
-    online = time.time() - last_ping < 7
+    online = time.time() - last_ping < 20
     return render_template("index.html", online=online, command=command, message=message)
 
 @app.route("/ping", methods=["POST"])
 def ping():
-    global last_ping, API_KEY, server_status
-    if server_status == "Offline":
-        return "Server is offline.", 503
+    global last_ping, API_KEY
     api_key = request.headers.get("API-Key")
     if api_key != API_KEY:
         print("Unauthorized ping attempt with API Key:", api_key)
@@ -44,19 +31,15 @@ def ping():
 
 @app.route("/get-command", methods=["GET"])
 def get_command():
-    global command, server_status
-    if server_status == "Offline":
-        return "Server is offline.", 503
+    global command
     if command:
         cmd = command
-        return jsonify(command=cmd, online=(time.time() - last_ping < 7))
-    return jsonify(command=None, online=(time.time() - last_ping < 7))
+        return jsonify(command=cmd, online=(time.time() - last_ping < 20))
+    return jsonify(command=None, online=(time.time() - last_ping < 20))
 
 @app.route("/lock", methods=["POST"])
 def lock():
-    global command, message, server_status
-    if server_status == "Offline":
-        return "Server is offline.", 503
+    global command, message
     pw = request.json.get("password")
     if pw != password:
         message = {"msg": "Incorrect password.", "css_color": "red"}
@@ -67,9 +50,6 @@ def lock():
 
 @app.route("/unlock", methods=["POST"])
 def unlock():
-    global server_status
-    if server_status == "Offline":
-        return "Server is offline.", 503
     global command, message
     pw = request.json.get("password")
     if pw != password:
@@ -81,9 +61,7 @@ def unlock():
 
 @app.route("/change-password", methods=["POST"])
 def set_password():
-    global password, message, server_status
-    if server_status == "Offline":
-        return "Server is offline.", 503
+    global password, message
     pw = request.json.get("password")
     new_pw = request.json.get("new_password")
     if pw != password:
@@ -103,8 +81,6 @@ def favicon():
 @app.route("/set-message", methods=["POST"])
 def set_message():
     global message, API_KEY, command
-    if server_status == "Offline":
-        return "Server is offline.", 503
     api_key = request.headers.get("API-Key")
     
     if api_key != API_KEY:
@@ -121,43 +97,9 @@ def set_message():
 
 @app.route("/get-message", methods=["GET"])
 def get_message():
-    global message, server_status
-    if server_status == "Offline":
-        return "Server is offline.", 503
+    global message
     return jsonify(msg=message["msg"], css_color=message["css_color"])
-
-def shell():
-    time.sleep(1)
-    while True:
-        cmd = input("\033[93m>\033[0m ")
-        if cmd == "stop":
-            global server_status
-            server_status = "Offline"
-            print("Server status set to Offline.")
-        elif cmd.startswith("setkey "):
-            global API_KEY
-            API_KEY = cmd.split(" ")[1]
-            print("New API Key set to:", API_KEY)
-        elif cmd.startswith("setmsg "):
-            global message
-            msg = cmd[len("setmsg "):]
-            message = {"msg": msg, "css_color": "blue"}
-            print("Message set to:", msg)
-        elif cmd == "resetpw":
-            global password
-            password = ""
-            print("Password reset to empty string.")
-        elif cmd == "start":
-            server_status = "Online"
-            print("Server status set to Online.")
-        elif cmd=="status":
-            print("Server status:", server_status)
-        elif cmd == "help":
-            print("Available commands:\nstop - Stop the server\nsetkey <new_key> - Set a new API key\nsetmsg <message> - Set a custom message\nresetpw - Reset password to empty string\nstart - Set server status to Online\nstatus - Show current server status\nhelp - Show this help message")
-        else:
-            print("Unknown command. Type help for a list of commands.")
 
 if __name__ == "__main__":
     print("\033[93mPlease enter this API key in the client input:\033[92m", API_KEY, "\033[0m")
-    Thread(target=shell, daemon=True).start()
     app.run(host="0.0.0.0", port=8080)
